@@ -38,3 +38,6 @@ out/
 
 ### Static Frontend ###
 /src/main/resources/static/page
+
+### Protected Values ###
+src/main/resources/application.yml

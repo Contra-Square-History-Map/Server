@@ -1,23 +1,11 @@
 package afrock.dance.map
 
-import afrock.dance.map.entity.Comment
-import afrock.dance.map.entity.Contribution
 import afrock.dance.map.entity.Instrument
-import afrock.dance.map.entity.Musician
-import afrock.dance.map.entity.Recording
-import afrock.dance.map.entity.Sample
-import afrock.dance.map.repository.CommentRepository
-import afrock.dance.map.repository.ContributionRepository
 import afrock.dance.map.repository.InstrumentRepository
-import afrock.dance.map.repository.MusicianRepository
-import afrock.dance.map.repository.RecordingRepository
-import afrock.dance.map.repository.SampleRepository
 import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
-import java.util.Calendar
-import java.util.Date
 
 @SpringBootApplication
 class MapApplication {

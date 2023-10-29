@@ -1,42 +1,34 @@
 package afrock.dance.map.entity
 
+import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.index.TextIndexed
+import org.springframework.data.mongodb.core.mapping.Document
+import java.util.Date
 import afrock.dance.map.recording as recordingMessage
 import afrock.dance.map.sample as sampleMessage
-import jakarta.persistence.CascadeType
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.FetchType
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.ManyToMany
-import jakarta.persistence.OneToMany
-import jakarta.persistence.Temporal
-import jakarta.persistence.TemporalType
-import java.util.Date
 
-@Entity
+@Document
 data class Recording(
-    @Column(nullable = false) var title: String,
-    @Column(nullable = false) var band: String,
-    @Column(nullable = false) @Temporal(TemporalType.TIMESTAMP) var releaseDate: Date,
-    @Column(nullable = false) var latitude: Float,
-    @Column(nullable = false) var longitude: Float,
-    @Column(nullable = false) var location: String,
-    @Column(nullable = false) var country: String,
-    @Column(nullable = false) var state: String,
-    @Column(nullable = false) var city: String,
-    @ManyToMany(fetch = FetchType.EAGER, cascade = [CascadeType.ALL]) var contributions: Set<Contribution>,
-    @Column(nullable = false) var lpRelease: Boolean,
-    @Column(nullable = false) var cassetteRelease: Boolean,
-    @Column(nullable = false) var cdRelease: Boolean,
-    @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.ALL]) var comments: Set<Comment>,
-    @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.ALL]) var samples: Set<Sample>,
-    @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.ALL]) var images: Set<Image>,
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) var id: Long? = null
+    @TextIndexed var title: String,
+    @TextIndexed var band: String,
+    var releaseDate: Date,
+    var latitude: Float,
+    var longitude: Float,
+    @TextIndexed var location: String,
+    @TextIndexed var country: String,
+    @TextIndexed var state: String,
+    @TextIndexed var city: String,
+    var contributions: Set<Contribution>,
+    var lpRelease: Boolean,
+    var cassetteRelease: Boolean,
+    var cdRelease: Boolean,
+    var comments: Set<Comment>,
+    var samples: Set<Sample>,
+    var images: Set<Image>,
+    @Id var id: String? = null
 ) {
     fun toProto() = recordingMessage {
-        id = this@Recording.id ?: -1
+        id = this@Recording.id ?: ""
         title = this@Recording.title
         band = this@Recording.band
         releaseTime = this@Recording.releaseDate.time
@@ -58,7 +50,7 @@ data class Recording(
     }
 
     fun toProtoLite() = recordingMessage {
-        id = this@Recording.id ?: -1
+        id = this@Recording.id ?: ""
         title = this@Recording.title
         releaseTime = this@Recording.releaseDate.time
         latitude = this@Recording.latitude

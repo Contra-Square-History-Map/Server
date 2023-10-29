@@ -2,21 +2,19 @@ package afrock.dance.map.entity
 
 import afrock.dance.map.Musician as MusicianMessage
 import afrock.dance.map.musician as musicianMessage
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
+import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.index.TextIndexed
+import org.springframework.data.mongodb.core.mapping.Document
 
-@Entity
+@Document
 data class Musician(
-    @Column(nullable = false) var firstName: String,
-    @Column(nullable = false) var lastName: String,
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) var id: Long? = null
+    @TextIndexed var firstName: String,
+    @TextIndexed var lastName: String,
+    @Id var id: String? = null
 ) {
     fun toProto(): MusicianMessage {
         return musicianMessage {
-            id = this@Musician.id ?: -1
+            id = this@Musician.id ?: ""
             firstName = this@Musician.firstName
             lastName = this@Musician.lastName
         }

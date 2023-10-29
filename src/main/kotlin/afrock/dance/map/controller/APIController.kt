@@ -1,7 +1,6 @@
 package afrock.dance.map.controller
 
 import afrock.dance.map.API_BASE_ROUTE
-import afrock.dance.map.COMMENTS
 import afrock.dance.map.INSTRUMENTS
 import afrock.dance.map.JSON_BASE_ROUTE
 import afrock.dance.map.PROTO_BASE_ROUE
@@ -15,13 +14,9 @@ import afrock.dance.map.entity.Instrument
 import afrock.dance.map.entity.Musician
 import afrock.dance.map.entity.Recording
 import afrock.dance.map.entity.Sample
-import afrock.dance.map.repository.CommentRepository
-import afrock.dance.map.repository.ContributionRepository
-import afrock.dance.map.repository.ImageRepository
 import afrock.dance.map.repository.InstrumentRepository
 import afrock.dance.map.repository.MusicianRepository
 import afrock.dance.map.repository.RecordingRepository
-import afrock.dance.map.repository.SampleRepository
 import com.google.protobuf.util.JsonFormat
 import org.slf4j.LoggerFactory
 import org.springframework.cache.annotation.Cacheable
@@ -37,7 +32,6 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 import java.time.Instant
 import java.util.Date
-import afrock.dance.map.Comment as CommentMessage
 import afrock.dance.map.InstrumentList as InstrumentsMessage
 import afrock.dance.map.Recording as RecordingMessage
 import afrock.dance.map.RecordingList as RecordingListMessage
@@ -49,12 +43,8 @@ import afrock.dance.map.recordingList as recordingListMessage
 @Cacheable("jsonCache")
 class APIController(
     val recordingRepository: RecordingRepository,
-    val commentRepository: CommentRepository,
     val instrumentRepository: InstrumentRepository,
     val musicianRepository: MusicianRepository,
-    val sampleRepository: SampleRepository,
-    val imageRepository: ImageRepository,
-    val contributionRepository: ContributionRepository,
 ) {
 
     private val log = LoggerFactory.getLogger(this.javaClass)
@@ -89,7 +79,7 @@ class APIController(
 
     fun getRecording(id: String): RecordingMessage {
         try {
-            return recordingRepository.findByIdOrNull(id.toLong())?.toProto() ?: throw ResponseStatusException(
+            return recordingRepository.findByIdOrNull(id)?.toProto() ?: throw ResponseStatusException(
                 HttpStatus.NOT_FOUND, "A comment with the requested ID could not be found."
             )
         } catch (e: NumberFormatException) {
@@ -107,28 +97,6 @@ class APIController(
     @GetMapping(PROTO_BASE_ROUE + RECORDING)
     fun getRecordingProto(@RequestParam(name = "id", required = true) id: String): ByteArray {
         return getRecording(id).toByteArray()
-    }
-
-    fun getComment(id: String): CommentMessage {
-        try {
-            return commentRepository.findByIdOrNull(id.toLong())?.toProto() ?: throw ResponseStatusException(
-                HttpStatus.NOT_FOUND, "A comment with the requested ID could not be found."
-            )
-        } catch (e: NumberFormatException) {
-            throw ResponseStatusException(
-                HttpStatus.BAD_REQUEST, "Parameter 'id' could not be resolved to a long value."
-            )
-        }
-    }
-
-    @GetMapping(JSON_BASE_ROUTE + COMMENTS)
-    fun getCommentJson(@RequestParam(name = "id", required = true) id: String): String {
-        return JsonFormat.printer().omittingInsignificantWhitespace().print(getComment(id))
-    }
-
-    @GetMapping(PROTO_BASE_ROUE + COMMENTS)
-    fun getCommentProto(@RequestParam(name = "id", required = true) id: String): ByteArray {
-        return getComment(id).toByteArray()
     }
 
     fun getInstruments(): InstrumentsMessage {
@@ -171,13 +139,13 @@ class APIController(
                 location = message.location,
                 releaseDate = Date.from(Instant.ofEpochSecond(message.releaseTime)),
                 comments = message.commentsList.map { commentMessage ->
-                    return@map commentRepository.save(Comment(commentMessage.author, commentMessage.text))
+                    Comment(commentMessage.author, commentMessage.text)
                 }.toSet(),
                 samples = message.samplesList.map { sampleMessage ->
-                    return@map sampleRepository.save(Sample(title = sampleMessage.title, path = sampleMessage.url))
+                    Sample(title = sampleMessage.title, path = sampleMessage.url)
                 }.toSet(),
                 images = message.imagesList.map { imageMessage ->
-                    return@map imageRepository.save(Image(imageMessage))
+                    return@map Image(imageMessage)
                 }.toSet(),
                 contributions = message.contributionsList.map { contributionMessage ->
                     val musician = musicianRepository.findByFirstNameAndLastName(
@@ -193,10 +161,8 @@ class APIController(
                             Instrument(contributionMessage.instrument)
                         )
 
-                    return@map contributionRepository.findByMusicianAndInstrument(musician, instrument)
-                        ?: contributionRepository.save<Contribution>(
-                            Contribution(musician, instrument)
-                        )
+                    return@map Contribution(musician, instrument)
+
                 }.toSet(),
             )
         )

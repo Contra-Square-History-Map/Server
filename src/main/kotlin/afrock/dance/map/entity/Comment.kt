@@ -1,22 +1,19 @@
 package afrock.dance.map.entity
 
+import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.index.TextIndexed
 import afrock.dance.map.Comment as CommentMessage
 import afrock.dance.map.comment as commentMessage
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
 
-@Entity
+import org.springframework.data.mongodb.core.mapping.Document
+
+@Document
 data class Comment(
-    @Column(nullable = false) var author: String,
-    @Column(nullable = false, length = 65535) var body: String,
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) var id: Long? = null
+    @TextIndexed var author: String,
+    @TextIndexed var body: String,
 ) {
     fun toProto(): CommentMessage {
         return commentMessage {
-            id = this@Comment.id ?: -1
             author = this@Comment.author
             text = this@Comment.body
         }
